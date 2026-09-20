@@ -146,11 +146,14 @@ public class DriveSubsystem extends SubsystemBase {
    * @param fieldRelative Whether the provided x and y speeds are relative to the
    *                      field.
    */
-  public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+  public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, Boolean Auto) { //Boolean[] buttons
     // Convert the commanded speeds into the correct units for the drivetrain
-    double xSpeedDelivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond;
-    double ySpeedDelivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond;
-    double rotDelivered = rot * DriveConstants.kMaxAngularSpeed;
+    double xSpeedDelivered = xSpeed * (Auto ? DriveConstants.kMaxSpeedMetersPerSecond / 2 : DriveConstants.kMaxSpeedMetersPerSecond);
+    double ySpeedDelivered = ySpeed * (Auto ? DriveConstants.kMaxSpeedMetersPerSecond / 2 : DriveConstants.kMaxSpeedMetersPerSecond);
+    double rotDelivered = rot * (Auto ? DriveConstants.kMaxAngularSpeed / 2 : DriveConstants.kMaxAngularSpeed);
+
+    /*var defaultStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
+                Rotation2d.fromDegrees(getHeading())));*/
 
     var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
         fieldRelative
@@ -163,6 +166,13 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
+
+    /*
+    m_frontLeft.setDesiredState((buttons[0]) ? swerveModuleStates[0] : defaultStates[0]);
+    m_frontRight.setDesiredState((buttons[1]) ? swerveModuleStates[1] : defaultStates[1]);
+    m_rearLeft.setDesiredState((buttons[2]) ? swerveModuleStates[2] : defaultStates[2]);
+    m_rearRight.setDesiredState((buttons[3]) ? swerveModuleStates[3] : defaultStates[3]);
+    */
   }
 
   /**
@@ -237,7 +247,7 @@ public class DriveSubsystem extends SubsystemBase {
     } else {
       my_yaw = m_gyro.getYaw();
     }
-    //System.out.println(my_yaw);
+    // System.out.println(my_yaw);
 
     return my_yaw;
   };

@@ -11,11 +11,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 
 import frc.robot.Configs;
 
@@ -48,13 +49,19 @@ public class MAXSwerveModule {
     m_drivingClosedLoopController = m_drivingSpark.getClosedLoopController();
     m_turningClosedLoopController = m_turningSpark.getClosedLoopController();
 
-    // Apply the respective configurations to the SPARKS. Reset parameters before
-    // applying the configuration to bring the SPARK to a known good state. Persist
-    // the settings to the SPARK to avoid losing them on a power cycle.
-    m_drivingSpark.configure(Configs.MAXSwerveModule.drivingConfig, ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
-    m_turningSpark.configure(Configs.MAXSwerveModule.turningConfig, ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
+    // Apply the respective configurations to the SPARKS.
+    m_drivingSpark.configure(Configs.MAXSwerveModule.getDrivingConfig(), ResetMode.kNoResetSafeParameters,
+        PersistMode.kNoPersistParameters);
+    m_turningSpark.configure(Configs.MAXSwerveModule.getTurningConfig(), ResetMode.kNoResetSafeParameters,
+        PersistMode.kNoPersistParameters);
+
+    // Give the CAN bus 50 milliseconds to process the configurations 
+    // before the DriveSubsystem tries to instantiate the next module.
+    try {
+      Thread.sleep(50);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
 
     m_chassisAngularOffset = chassisAngularOffset;
     m_desiredState.angle = new Rotation2d(m_turningEncoder.getPosition());
@@ -109,8 +116,8 @@ public class MAXSwerveModule {
     correctedDesiredState.optimize(new Rotation2d(m_turningEncoder.getPosition()));
 
     // Command driving and turning SPARKS towards their respective setpoints.
-    m_drivingClosedLoopController.setReference(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
-    m_turningClosedLoopController.setReference(correctedDesiredState.angle.getRadians(), ControlType.kPosition);
+    m_drivingClosedLoopController.setSetpoint(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+    m_turningClosedLoopController.setSetpoint(correctedDesiredState.angle.getRadians(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
 
     m_desiredState = desiredState;
   }
@@ -119,8 +126,8 @@ public class MAXSwerveModule {
    * Blocks WPILib from setting the turning motor to zero if there is no substantial velocity.
    */
   public void stop() {
-    m_drivingClosedLoopController.setReference(0, ControlType.kDutyCycle);
-    m_turningClosedLoopController.setReference(m_turningEncoder.getPosition(), ControlType.kPosition);
+    m_drivingClosedLoopController.setSetpoint(0, ControlType.kDutyCycle, ClosedLoopSlot.kSlot0);
+    m_turningClosedLoopController.setSetpoint(m_turningEncoder.getPosition(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
   }
 
   /** Zeroes all the SwerveModule encoders. */

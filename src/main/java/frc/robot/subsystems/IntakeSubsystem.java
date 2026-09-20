@@ -42,8 +42,8 @@ public class IntakeSubsystem extends SubsystemBase{
         armClosedLoopController = armMotor.getClosedLoopController();
         
         SparkFlexConfig armMotorConfig = new SparkFlexConfig();
-        armMotorConfig.inverted(true);
-        armMotor.configure(armMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        armMotorConfig.inverted(false);
+        armMotor.configureAsync(armMotorConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
         armConfig = new SparkFlexConfig();
         armConfig.inverted(true);
@@ -59,20 +59,25 @@ public class IntakeSubsystem extends SubsystemBase{
             .p(0.0001, ClosedLoopSlot.kSlot1)
             .i(0, ClosedLoopSlot.kSlot1)
             .d(0, ClosedLoopSlot.kSlot1)
-            .velocityFF(1.0 / 5767, ClosedLoopSlot.kSlot1)
+            //.velocityFF(1.0 / 5767, ClosedLoopSlot.kSlot1)
+            .dFilter(1.0 / 5767, ClosedLoopSlot.kSlot1)
             .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
 
         armController = new PID(1, -1, .4, .025, 0);
 
         armConfig.closedLoop.maxMotion
-            .maxVelocity(1000)
+            //.maxVelocity(1000)
+            .cruiseVelocity(1000)
             .maxAcceleration(1000)
-            .allowedClosedLoopError(0.001)
+            //.allowedClosedLoopError(0.001)
+            .allowedProfileError(0.001)
             .maxAcceleration(500, ClosedLoopSlot.kSlot1)
-            .maxVelocity(6000, ClosedLoopSlot.kSlot1)
-            .allowedClosedLoopError(0.001, ClosedLoopSlot.kSlot1);
+            //.maxVelocity(6000, ClosedLoopSlot.kSlot1)
+            .cruiseVelocity(6000, ClosedLoopSlot.kSlot1)
+            //.allowedClosedLoopError(0.001, ClosedLoopSlot.kSlot1);
+            .allowedProfileError(0.001, ClosedLoopSlot.kSlot1);
 
-        armMotor.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters); 
+        armMotor.configureAsync(armConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters); 
         intakeEncoder.setPosition(0);
         armEncoder.setPosition(0);
 
@@ -103,7 +108,7 @@ public class IntakeSubsystem extends SubsystemBase{
     }
 
     public void setSpeed(double speed) {
-        intakeMotor.set(speed);
+        intakeMotor.set(-speed / 2);
     }
 
     public void stop() {

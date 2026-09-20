@@ -5,16 +5,24 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.cameraserver.CameraServer;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-
+  private final CommandScheduler m_cmdScheduler = CommandScheduler.getInstance();
+  private final Timer m_timer = new Timer();
   private final RobotContainer m_robotContainer;
+
   public static boolean teleop = false;
+  private Boolean scheduledAuto = false;
 
   public Robot() {
+    // start camera server
+    // CameraServer.startAutomaticCapture();
+
     m_robotContainer = new RobotContainer();
   }
 
@@ -36,19 +44,34 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand(false);
+    m_timer.restart();
 
-    if (m_autonomousCommand != null) {
+    /*if (m_autonomousCommand != null) {
       // m_autonomousCommand.schedule();
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
+    }*/
+  }
+
+  @Override
+  public void autonomousPeriodic() {
+    // Run auto movement & shooting
+    if (!scheduledAuto) {
+      m_cmdScheduler.schedule(m_autonomousCommand);
+      scheduledAuto = true;
+    }
+
+    // Repeat climb command for 1.5 seconds (end of auto)
+    if (m_timer.get() > 15.0 && m_timer.get() < 16.1 ) {
+      Command climbCommand = m_robotContainer.getAutonomousCommand(true);
+      m_cmdScheduler.schedule(climbCommand);
     }
   }
 
   @Override
-  public void autonomousPeriodic() {}
-
-  @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+    m_timer.stop();
+  }
 
   @Override
   public void teleopInit() {
