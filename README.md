@@ -1,2 +1,2 @@
-<h1><center>About This Repository</center></h1>
-<p><center>This is the ongoing GitHub for FRC team 9086. Robot code from this year into upcoming years should be stored here.</center></p>
+<h1>About This Repository</h1>
+<p>This is the ongoing GitHub for FRC team 9086. Robot code from this year into upcoming years should be stored here.</p>
