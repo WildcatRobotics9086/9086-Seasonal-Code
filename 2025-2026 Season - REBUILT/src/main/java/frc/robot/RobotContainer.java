@@ -32,8 +32,9 @@ public class RobotContainer {
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 
   // Controller
-  private final XboxController driverController = new XboxController(OIConstants.kDriverControllerPort);      // Port 1 is driver
-  private final XboxController operatorController = new XboxController(OIConstants.kOperatorControllerPort);  // port 0 is operator
+  // Driver is port 1 and Operator is port 0 under usb connections in Driver Station      // This can be changed in Constants.java
+  private final XboxController driverController = new XboxController(OIConstants.kDriverControllerPort);
+  private final XboxController operatorController = new XboxController(OIConstants.kOperatorControllerPort);
 
   public RobotContainer() {
     configureBindings();
@@ -44,9 +45,9 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(
       new RunCommand(
         () -> {
-          double leftX = MathUtil.applyDeadband(driverController.getLeftY() * 1, OIConstants.kDriveDeadband); // Deleted * -3 (add back if needed)
-          double leftY = MathUtil.applyDeadband(driverController.getLeftX() * 1, OIConstants.kDriveDeadband);
-          double rightX = MathUtil.applyDeadband(driverController.getRightX() * 1, OIConstants.kDriveDeadband);
+          double leftX = MathUtil.applyDeadband(driverController.getLeftY() * -1.0, OIConstants.kDriveDeadband);
+          double leftY = MathUtil.applyDeadband(driverController.getLeftX() * -1.0, OIConstants.kDriveDeadband);
+          double rightX = MathUtil.applyDeadband(driverController.getRightX() * -1.0, OIConstants.kDriveDeadband);
 
           // Test individual motors
           // Boolean[] buttons = {driverController.getXButton(), driverController.getYButton(), driverController.getAButton(), driverController.getBButton()};
