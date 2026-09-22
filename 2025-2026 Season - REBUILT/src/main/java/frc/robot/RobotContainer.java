@@ -45,9 +45,9 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(
       new RunCommand(
         () -> {
-          double leftX = MathUtil.applyDeadband(driverController.getLeftY() * -1.0, OIConstants.kDriveDeadband);
-          double leftY = MathUtil.applyDeadband(driverController.getLeftX() * -1.0, OIConstants.kDriveDeadband);
-          double rightX = MathUtil.applyDeadband(driverController.getRightX() * -1.0, OIConstants.kDriveDeadband);
+          double leftX = MathUtil.applyDeadband(driverController.getLeftY() * -3.0, OIConstants.kDriveDeadband);
+          double leftY = MathUtil.applyDeadband(driverController.getLeftX() * -3.0, OIConstants.kDriveDeadband);
+          double rightX = MathUtil.applyDeadband(driverController.getRightX() * -3.0, OIConstants.kDriveDeadband);
 
           // Test individual motors
           // Boolean[] buttons = {driverController.getXButton(), driverController.getYButton(), driverController.getAButton(), driverController.getBButton()};
@@ -58,12 +58,12 @@ public class RobotContainer {
         )
     );
 
-    // intakeSubsystem.setDefaultCommand(
-    //   new RunCommand(() -> {
-    //     double pullerSpool = operatorController.getRightTriggerAxis() * brev();
+    intakeSubsystem.setDefaultCommand(
+      new RunCommand(() -> {
+        double pullerSpool = operatorController.getRightTriggerAxis() * brev();
 
-    //     intakeSubsystem.setSpeed(pullerSpool);
-    //   }, intakeSubsystem));
+        intakeSubsystem.setSpeed(pullerSpool);
+      }, intakeSubsystem));
 
     shooterSubsystem.setDefaultCommand(
       new RunCommand(() -> {
@@ -136,10 +136,10 @@ public class RobotContainer {
         new Pull(shooterSubsystem, operatorController)
       );
 
-    // new Trigger(operatorController::getRightBumperButton)
-    //   .whileTrue(
-    //     new MoveArmToPosition(intakeSubsystem, operatorController)
-    //   );
+    new Trigger(operatorController::getRightBumperButton)
+      .whileTrue(
+        new MoveArmToPosition(intakeSubsystem, operatorController)
+      );
   }
 
   public Command getAutonomousCommand(Boolean climb) {
